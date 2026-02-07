@@ -1,0 +1,97 @@
+# ============================================================
+# CIRCLE_A_G – FORM SPECIFICATION
+# FORM VERSION: 1.1
+# STATUS: FINAL_LOCK
+# PURPOSE: Machine-readable contract for Codex
+# ============================================================
+
+FORM:
+  NAME: GOLD_ANALYSIS_REPORT
+  VERSION: 1.1
+  STATUS: FINAL_LOCK
+  OWNER: SYSTEM_ARCHITECT
+  DESCRIPTION: >
+    Báo cáo phân tích giá vàng dựa trên dữ liệu đã lưu trữ.
+    FORM này là hợp đồng kỹ thuật bất biến giữa các module.
+
+# ------------------------------------------------------------
+# INPUT SECTION
+# ------------------------------------------------------------
+INPUT:
+  DATA_SOURCE:
+    - name: gold_market_data
+      type: time_series
+      required: true
+      description: Dữ liệu giá vàng theo thời gian
+
+  PARAMETERS:
+    - name: analysis_window
+      type: integer
+      required: true
+      description: Số phiên dùng để phân tích
+
+# ------------------------------------------------------------
+# OUTPUT FIELDS (CONTRACT)
+# ------------------------------------------------------------
+FIELDS:
+  - name: gold_price
+    type: float
+    required: true
+    description: Giá vàng hiện tại
+
+  - name: trend
+    type: string
+    allowed_values: [UP, DOWN, SIDEWAYS]
+    required: true
+    description: Xu hướng giá
+
+  - name: volatility
+    type: float
+    required: true
+    description: Độ biến động
+
+  - name: confidence_score
+    type: float
+    range: [0.0, 1.0]
+    required: true
+    description: Mức độ tin cậy của phân tích
+
+# ------------------------------------------------------------
+# LOGIC CONSTRAINTS (MUST NOT VIOLATE)
+# ------------------------------------------------------------
+LOGIC_CONSTRAINTS:
+  - rule: no_field_removal
+    description: Không được xóa hoặc đổi tên field đã định nghĩa
+
+  - rule: backward_compatibility_required
+    description: Mọi thay đổi phải tương thích dữ liệu cũ
+
+  - rule: logic_preservation
+    description: >
+      Không được cắt bỏ logic hiện có.
+      Chỉ được bọc guard hoặc deprecate, tuyệt đối không xóa.
+
+  - rule: output_stability
+    description: Cấu trúc và semantics của output không được thay đổi
+
+# ------------------------------------------------------------
+# CODEX BEHAVIOR RULES
+# ------------------------------------------------------------
+CODEX_RULES:
+  - If form_version != 1.1: STOP
+  - If STATUS == FINAL_LOCK: DO NOT MODIFY LOGIC
+  - If information is missing: STOP AND ASK
+
+# ------------------------------------------------------------
+# COMPATIBILITY MATRIX
+# ------------------------------------------------------------
+COMPATIBILITY:
+  SUPPORTED_FORM_VERSIONS: [1.0, 1.1]
+
+# ------------------------------------------------------------
+# AUDIT
+# ------------------------------------------------------------
+AUDIT:
+  CREATED_BY: SYSTEM
+  CREATED_AT: 2026-02-06
+  CHANGE_POLICY: IMMUTABLE
